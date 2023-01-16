@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { sign } from 'jsonwebtoken';
 import {} from 'module';
 import { JWT_SECRET } from '../config';
+import { UserResponseInterface } from './types/userResponse.interface';
 
 @Injectable()
 export class UserService {
@@ -39,10 +40,11 @@ export class UserService {
     );
   }
 
-  buildUserResponse(user: UserEntity) {
+  buildUserResponse(user: UserEntity): UserResponseInterface {
     return {
       user: {
         ...user,
+        hasPassword: user.hasPassword,
         token: this.generateToken(user),
       },
     };
