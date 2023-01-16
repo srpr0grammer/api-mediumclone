@@ -4,7 +4,9 @@ import { CreateUserDTO } from './dto/createUser.dto';
 import { UserEntity } from './user.entity';
 import { Repository } from 'typeorm';
 import { sign } from 'jsonwebtoken';
+import {} from 'module';
 import { JWT_SECRET } from '../config';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -18,7 +20,15 @@ export class UserService {
     return await this.userRespoitory.save(newUser);
   }
 
-  generateToken(user: UserEntity): string {
+  async findAll(): Promise<UserEntity[]> {
+    return await this.userRespoitory.find();
+  }
+
+  async findById(id: number): Promise<UserEntity> {
+    return this.userRespoitory.findOneBy({ id: id }); // where "id" is your primary column name
+  }
+
+  generateToken(user: UserEntity): any {
     return sign(
       {
         id: user.id,
@@ -29,7 +39,7 @@ export class UserService {
     );
   }
 
-  buildResponse(user: UserEntity): any {
+  buildUserResponse(user: UserEntity) {
     return {
       user: {
         ...user,
@@ -37,10 +47,4 @@ export class UserService {
       },
     };
   }
-
-  //  async findByUser(id:number): Promise<UserEntity> {
-  //   const user = this.userRespoitory.findOne()
-
-  //   return user
-  //  }
 }
