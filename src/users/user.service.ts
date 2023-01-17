@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDTO } from './dto/createUser.dto';
 import { UserEntity } from './user.entity';
@@ -8,6 +12,8 @@ import {} from 'module';
 import { JWT_SECRET } from '../config';
 import { UserResponseInterface } from './types/userResponse.interface';
 import { IsEmail } from 'class-validator';
+import { LoginUserDTO } from './dto/login.user.dto';
+import { compare } from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -41,6 +47,30 @@ export class UserService {
 
   async findById(id: number): Promise<UserEntity> {
     return this.userRespoitory.findOneBy({ id: id });
+  }
+
+  async login(loginUserDTO: LoginUserDTO): Promise<UserEntity> {
+    const user = await this.userRespoitory.findOne({
+      where: {
+        email: loginUserDTO.email,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Credentials are not valid.');
+    }
+
+    const isPasswordCorrect = await compare(
+      loginUserDTO.password,
+      user.password,
+    );
+
+    if (!isPasswordCorrect) {
+      throw new BadRequestException('Credentials are not valid.');
+    }
+
+    delete user.password;
+    return user;
   }
 
   generateToken(user: UserEntity): any {

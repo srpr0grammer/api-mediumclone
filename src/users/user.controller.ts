@@ -7,11 +7,13 @@ import {
   ValidationPipe,
   HttpException,
   NotFoundException,
+  HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDTO } from './dto/createUser.dto';
 import { UserEntity } from './user.entity';
 import { UserResponseInterface } from './types/userResponse.interface';
+import { LoginUserDTO } from './dto/login.user.dto';
 
 @Controller('api')
 export class UserController {
@@ -23,6 +25,17 @@ export class UserController {
     @Body('user') createUserDTO: CreateUserDTO,
   ): Promise<UserResponseInterface> {
     const user = await this.userService.createUser(createUserDTO);
+
+    return this.userService.buildUserResponse(user);
+  }
+
+  @Post('/users/login')
+  @HttpCode(200)
+  @UsePipes(new ValidationPipe())
+  async login(
+    @Body('user') loginDTO: LoginUserDTO,
+  ): Promise<UserResponseInterface> {
+    const user = await this.userService.login(loginDTO);
 
     return this.userService.buildUserResponse(user);
   }
